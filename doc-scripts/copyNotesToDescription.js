@@ -10,6 +10,8 @@ function copyNotesToDescription(prepFieldName) {
     var notesField = this.getField("Notes" + lvl + "_" + row);
         // Only one spell description field remains; always target spellDescription0
     var descField  = this.getField("spellDescription0");
+    var levelField = this.getField("spellCastingLevel" + lvl);
+    var displayLevelField = this.getField("spellCastingLevel0");
 
     if (!notesField || !descField) return;
 
@@ -18,8 +20,13 @@ function copyNotesToDescription(prepFieldName) {
 
     if (isChecked) {
       descField.value = String(notesField.value || "").replace(/\\n/g, "\r");
+      if (displayLevelField) {
+        var levelLabel = levelField ? String(levelField.value || lvl) : lvl;
+        displayLevelField.value = levelLabel;
+      }
     } else {
       descField.value = "";
+      if (displayLevelField) displayLevelField.value = "";
     }
   } catch(e) {
     app.alert("Error copying notes: " + e);
