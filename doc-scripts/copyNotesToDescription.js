@@ -8,7 +8,8 @@ function copyNotesToDescription(prepFieldName) {
     var row = parts[2];
 
     var notesField = this.getField("Notes" + lvl + "_" + row);
-    var descField  = this.getField("spellDescription" + lvl);
+        // Only one spell description field remains; always target spellDescription0
+    var descField  = this.getField("spellDescription0");
 
     if (!notesField || !descField) return;
 
