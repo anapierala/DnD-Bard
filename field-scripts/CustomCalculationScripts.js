@@ -1362,10 +1362,36 @@ try {
     if(isNaN(level)) level=0;
 
     // spend slot (skip cantrips)
+    var usedSlotLevel = level;
     if(level>=1 && level<=9){
-      var slotName="Slots0_"+level;
+       // build list of available slot levels (at or above spell level)
+      var available=[];
+      for(var l=level;l<=9;l++){
+        var remaining=getInt.call(this,"Slots0_"+l);
+        if(remaining>0) available.push(l);
+      }
+
+      if(available.length===0){
+        app.alert("No spell slots of level "+level+" or higher remain.",3);
+        return;
+      }
+
+      // prompt for which slot to use (defaults to the spell's level)
+      var promptMsg="Use which spell slot to cast '"+spellName+"'?\n"+
+                    "Available: "+available.join(", ");
+      var resp=app.response({cQuestion:promptMsg,cTitle:"Choose Spell Slot",cDefault:String(level)});
+      if(resp===null){ return; } // cancelled
+
+      var match = String(resp).match(/\d+/);
+      var chosen = match ? parseInt(match[0],10) : NaN;
+      if(isNaN(chosen) || available.indexOf(chosen)===-1){
+        app.alert("Invalid slot level selected. Choose one of: "+available.join(", ")+".",3);
+        return;
+      }
+
+      usedSlotLevel = chosen;
+      var slotName="Slots0_"+usedSlotLevel;
       var slotVal=getInt.call(this,slotName);
-      if(slotVal<=0){ app.alert("No level "+level+" spell slots remain.",3); return; }
       this.getField(slotName).value=slotVal-1;
 
       // decrement SpellsRemaining
@@ -1393,7 +1419,8 @@ try {
       if(f) f.fillColor=color.ltGray;
     }
 
-    app.alert("Cast "+spellName+" (Level "+level+")",3);
+    var slotNote = (level>=1 && level<=9) ? " using slot level "+usedSlotLevel : "";
+    app.alert("Cast "+spellName+" (Level "+level+")"+slotNote,3);
     console.println("[CastSpell] Done – "+spellName);
   }catch(e){ console.println("[CastSpell ERROR] "+e); app.alert("CastSpell error: "+e); }
 })();
